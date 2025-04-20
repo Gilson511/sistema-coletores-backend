@@ -30,3 +30,15 @@ router.post("/", async (req, res) => {
 });
 
 module.exports = router;
+
+// ROTA GET - Listar todos os coletores
+router.get("/", async (req, res) => {
+    try {
+      const resultado = await db.query("SELECT * FROM coletores ORDER BY id DESC");
+      res.json(resultado.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Erro ao buscar coletores" });
+    }
+  });
+  

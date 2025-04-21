@@ -2,15 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
+// Middlewares globais
 app.use(cors());
 app.use(express.json());
 
-// Importa as rotas
+// Rotas
 const coletoresRoutes = require("./routes/coletores");
-const usuariosRoutes = require("./routes/usuarios");
-
-// Usa as rotas
+console.log("🧩 Carregando rotas de coletores:", coletoresRoutes.stack.map(r => r.route?.path));
 app.use("/api/coletores", coletoresRoutes);
+
+const usuariosRoutes = require("./routes/usuarios");
 app.use("/api/usuarios", usuariosRoutes);
 
 // Inicia o servidor

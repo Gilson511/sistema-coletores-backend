@@ -2,10 +2,18 @@ const express = require("express");
 const router = express.Router();
 const db = require("../database");
 
+router.use((req, res, next) => {
+  console.log(`🛰️ REQUISIÇÃO RECEBIDA -> ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+
 // 🔧 ROTA DE TESTE – deve vir antes de qualquer outra configuração
 router.get("/teste-delete", (req, res) => {
   res.send("🔧 Rota de teste acessada com sucesso");
 });
+
+
 
 // Middleware para logar todas as requisições recebidas
 router.use((req, res, next) => {
@@ -13,11 +21,11 @@ router.use((req, res, next) => {
   next();
 });
 
+
 console.log("✅ Arquivo coletores.js carregado!");
 
-// ROTA POST - Cadastrar coletor
 router.post("/", async (req, res) => {
-  const {
+  let {
     re,
     numero_coletor,
     encarregado,
@@ -28,20 +36,41 @@ router.post("/", async (req, res) => {
     estado
   } = req.body;
 
+  // Trata o campo hora_baixa corretamente
+  hora_baixa = hora_baixa && hora_baixa.trim() !== "" ? hora_baixa : null;
+
+  console.log("Dados prontos para inserir:", {
+    re,
+    numero_coletor,
+    encarregado,
+    turno,
+    setor,
+    hora_pegou,
+    hora_baixa, // deve estar como null se vazio
+    estado
+  });
+
+  console.log("📦 Dados recebidos:", req.body);
+
   try {
-    await db.query(
+    const result = await db.query(
       `INSERT INTO coletores 
       (re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado) 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado]
     );
 
+    // ✅ Log após salvar
+    console.log("✅ Coletor salvo com sucesso!")
+
     res.status(201).json({ message: "Coletor cadastrado com sucesso!" });
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERRO AO CADASTRAR:", err.message);  // <--- log do erro real
+    console.error("Detalhes do erro:",err);
     res.status(500).json({ error: "Erro ao cadastrar coletor." });
   }
 });
+
 
 // ROTA GET - Listar todos os coletores
 router.get("/", async (req, res) => {
@@ -103,9 +132,10 @@ router.put("/:id", async (req, res) => {
 
     res.json({ message: "Coletor atualizado com sucesso!" });
   } catch (err) {
-    console.error("Erro ao atualizar coletor:", err);
-    res.status(500).json({ error: "Erro ao atualizar coletor." });
+    console.error("❌ ERRO AO CADASTRAR:", err.message);
+    res.status(500).json({ error: err.message });
   }
+  
 });
 
 module.exports = router;

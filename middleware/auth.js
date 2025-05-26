@@ -1,14 +1,21 @@
-// backend/middleware/auth.js
+const jwt = require("jsonwebtoken");
+
 function autenticarToken(req, res, next) {
-    const token = req.headers['authorization'];
-  
-    // Aqui você pode usar um token fixo ou comparar com JWT futuramente
-    if (!token || token !== 'meu_token_supersecreto') {
-      return res.status(401).json({ error: 'Acesso não autorizado' });
-    }
-  
-    next(); // usuário está autenticado
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader) {
+    return res.status(401).json({ error: "Token não enviado" });
   }
-  
-  module.exports = autenticarToken;
-  
+
+  const [, token] = authHeader.split(" "); // divide "Bearer seu_token"
+
+  try {
+    const usuario = jwt.verify(token, "meu_token_supersecreto"); // mesma chave usada no login
+    req.usuario = usuario;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+}
+
+module.exports = autenticarToken;

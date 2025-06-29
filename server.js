@@ -23,3 +23,9 @@ app.use("/api/colaboradores", colaboradoresRoutes);
 app.listen(3000, () => {
   console.log("Servidor rodando na porta 3000");
 });
+
+app.listen(3000)
+
+  .on('error', (err) => {
+    console.error('erro:', err)
+  })

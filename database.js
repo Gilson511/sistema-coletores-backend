@@ -1,10 +1,11 @@
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // necessário para conexões em nuvem como Render
-  },
+  user: "postgres",
+  host: "localhost",
+  database: "coletores_db",
+  password: "2525",
+  port: 5432,
 });
 
 module.exports = pool;

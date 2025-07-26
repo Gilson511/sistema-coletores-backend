@@ -6,6 +6,7 @@ const pool = require('../database'); // conexão com PostgreSQL
 router.post('/', async (req, res) => {
   const { matricula, nome_completo, turno, setor, encarregado } = req.body;
 
+  console.log('recebido', req.body);
   try {
     const result = await pool.query(
       'INSERT INTO colaboradores (matricula, nome_completo, turno, setor, encarregado) VALUES ($1, $2, $3, $4, $5) RETURNING *',

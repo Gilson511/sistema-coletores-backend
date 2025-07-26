@@ -1,3 +1,18 @@
+// POST público (sem autenticação) para cadastro.html
+router.post('/', async (req, res) => {
+  const { numero_coletor, marca, sn } = req.body;
+  try {
+    await db.query(
+      'INSERT INTO base_coletores (numero_coletor, marca, sn) VALUES ($1, $2, $3)',
+      [numero_coletor, marca, sn]
+    );
+    res.status(201).json({ message: 'Coletor adicionado com sucesso (rota pública)' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao adicionar coletor' });
+  }
+});
+
+
 const autenticarToken = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();

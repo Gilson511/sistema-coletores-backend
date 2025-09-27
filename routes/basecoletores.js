@@ -1,3 +1,8 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../database');
+const autenticarToken = require('../middleware/auth');
+
 // POST público (sem autenticação) para cadastro.html
 router.post('/', async (req, res) => {
   const { numero_coletor, marca, sn } = req.body;
@@ -12,12 +17,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-const autenticarToken = require('../middleware/auth');
-const express = require('express');
-const router = express.Router();
-const db = require('../database');
-
 // GET - listar base de coletores
 router.get('/', async (req, res) => {
   try {
@@ -28,20 +27,21 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST - adicionar coletor
-router.post('/', async (req, res) => {
+// POST - adicionar coletor (rota protegida)
+router.post('/protegido', autenticarToken, async (req, res) => {
   const { numero_coletor, marca, sn } = req.body;
   try {
     await db.query(
       'INSERT INTO base_coletores (numero_coletor, marca, sn) VALUES ($1, $2, $3)',
       [numero_coletor, marca, sn]
     );
-    res.status(201).json({ message: 'Coletor adicionado com sucesso' });
+    res.status(201).json({ message: 'Coletor adicionado com sucesso (rota protegida)' });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao adicionar coletor, o mesmo ja existe com mesmo sn' });
+    res.status(500).json({ error: 'Erro ao adicionar coletor, o mesmo já existe com mesmo sn' });
   }
 });
 
+// DELETE - remover coletor
 router.delete('/:id', autenticarToken, async (req, res) => {
   const { id } = req.params;
   try {
@@ -51,6 +51,5 @@ router.delete('/:id', autenticarToken, async (req, res) => {
     res.status(500).json({ error: 'Erro ao remover coletor' });
   }
 });
-
 
 module.exports = router;

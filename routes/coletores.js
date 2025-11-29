@@ -1,29 +1,22 @@
+// routes/coletores.js
 const express = require("express");
 const router = express.Router();
 const db = require("../database");
 
+console.log("✅ Arquivo coletores.js carregado!");
+
+// Middleware global de log para todas as requisições deste router
 router.use((req, res, next) => {
-  console.log(`🛰️ REQUISIÇÃO RECEBIDA -> ${req.method} ${req.originalUrl}`);
+  console.log(`🛰️ [COLETORES] ${req.method} ${req.originalUrl}`);
   next();
 });
 
-
-// 🔧 ROTA DE TESTE – deve vir antes de qualquer outra configuração
+// 🔧 ROTA DE TESTE
 router.get("/teste-delete", (req, res) => {
   res.send("🔧 Rota de teste acessada com sucesso");
 });
 
-
-
-// Middleware para logar todas as requisições recebidas
-router.use((req, res, next) => {
-  console.log(`🛰️ Método: ${req.method} - URL: ${req.originalUrl}`);
-  next();
-});
-
-
-console.log("✅ Arquivo coletores.js carregado!");
-
+// CREATE - cadastrar coletor
 router.post("/", async (req, res) => {
   let {
     re,
@@ -36,54 +29,39 @@ router.post("/", async (req, res) => {
     estado
   } = req.body;
 
-  // Trata o campo hora_baixa corretamente
+  // Normaliza hora_baixa vazia -> null
   hora_baixa = hora_baixa && hora_baixa.trim() !== "" ? hora_baixa : null;
-
-  console.log("Dados prontos para inserir:", {
-    re,
-    numero_coletor,
-    encarregado,
-    turno,
-    setor,
-    hora_pegou,
-    hora_baixa, // deve estar como null se vazio
-    estado
-  });
 
   console.log("📦 Dados recebidos:", req.body);
 
   try {
-    const result = await db.query(
+    await db.query(
       `INSERT INTO coletores 
       (re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado) 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado]
     );
 
-    // ✅ Log após salvar
-    console.log("✅ Coletor salvo com sucesso!")
-
+    console.log("✅ Coletor salvo com sucesso!");
     res.status(201).json({ message: "Coletor cadastrado com sucesso!" });
   } catch (err) {
-    console.error("❌ ERRO AO CADASTRAR:", err.message);  // <--- log do erro real
-    console.error("Detalhes do erro:",err);
+    console.error("❌ ERRO AO CADASTRAR:", err.message);
     res.status(500).json({ error: "Erro ao cadastrar coletor." });
   }
 });
 
-
-// ROTA GET - Listar todos os coletores
+// READ - listar todos
 router.get("/", async (req, res) => {
   try {
     const resultado = await db.query("SELECT * FROM coletores ORDER BY id DESC");
     res.json(resultado.rows);
   } catch (err) {
-    console.error(err);
+    console.error("❌ Erro ao buscar coletores:", err.message);
     res.status(500).json({ error: "Erro ao buscar coletores" });
   }
 });
 
-// ROTA DELETE - Excluir coletor por ID
+// DELETE - excluir por ID
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -96,12 +74,12 @@ router.delete("/:id", async (req, res) => {
 
     res.json({ message: "Coletor excluído com sucesso!" });
   } catch (err) {
-    console.error("Erro ao excluir coletor:", err);
+    console.error("❌ Erro ao excluir coletor:", err.message);
     res.status(500).json({ error: "Erro ao excluir coletor." });
   }
 });
 
-// ROTA PUT - Atualizar coletor por ID
+// UPDATE - atualizar por ID
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const {
@@ -132,10 +110,11 @@ router.put("/:id", async (req, res) => {
 
     res.json({ message: "Coletor atualizado com sucesso!" });
   } catch (err) {
-    console.error("❌ ERRO AO CADASTRAR:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("❌ Erro ao atualizar coletor:", err.message);
+    res.status(500).json({ error: "Erro ao atualizar coletor." });
   }
-  
 });
+
+
 
 module.exports = router;

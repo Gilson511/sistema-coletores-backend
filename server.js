@@ -1,29 +1,35 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
-const app = express();
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors()); // Ou configure o origin aqui se quiser restringir
-
+// Middlewares globais
+app.use(cors());
 app.use(express.json());
 
-const coletoresRoutes = require("./routes/coletores");
-app.use("/api/coletores", coletoresRoutes);
+// Log simples de todas as requisições (opcional)
+app.use((req, res, next) => {
+  console.log(`📡 ${req.method} ${req.url}`);
+  next();
+});
 
-const usuariosRoutes = require("./routes/usuarios");
-app.use("/api/usuarios", usuariosRoutes);
+// Rotas principais
+app.use("/api/coletores", require("./routes/coletores"));
+app.use("/api/usuarios", require("./routes/usuarios"));
+app.use("/api/basecoletores", require("./routes/basecoletores"));
+app.use("/api/colaboradores", require("./routes/colaboradores"));
+app.use("/api/coletores_devolvidos", require("./routes/coletoresDevolvidos"));
 
-const baseColetoresRoutes = require("./routes/basecoletores");
-app.use("/api/basecoletores", baseColetoresRoutes);
-
-const colaboradoresRoutes = require("./routes/colaboradores");
-app.use("/api/colaboradores", colaboradoresRoutes);
-
+// Rota raiz para teste
 app.get("/", (req, res) => {
   res.send("✅ API está online e funcionando!");
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Inicialização do servidor
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Servidor rodando em http://0.0.0.0:${PORT}`);
 });
+
+

@@ -10,4 +10,7 @@ const pool = new Pool({
   ssl: false // como está local, não precisa de SSL
 });
 
+
+
 module.exports = pool;
+

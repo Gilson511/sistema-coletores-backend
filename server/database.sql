@@ -60,3 +60,16 @@ CREATE TABLE coletores_devolvidos (
   observacoes TEXT
 );
 
+
+--Permitir cadastro com numeração unica;
+ALTER TABLE base_coletores
+ADD CONSTRAINT unique_numero_coletor UNIQUE (numero_coletor);
+
+
+--os registros sao unicos, um colaborador pode fazer a retira apenas se nao tiver nenhuma pendencia de baixa. 
+CREATE UNIQUE INDEX unico_re_pendente
+ON coletores (re)
+WHERE hora_baixa IS NULL;
+
+
+

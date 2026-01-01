@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
     setor,
     hora_pegou,
     hora_baixa,
-    estado
+    estado,
   } = req.body;
 
   // Normaliza hora_baixa vazia -> null
@@ -35,11 +35,37 @@ router.post("/", async (req, res) => {
   console.log("📦 Dados recebidos:", req.body);
 
   try {
+    // 🔒 Verifica se o usuário já possui coletor pendente (sem baixa)
+    const verificaPendente = await db.query(
+      `SELECT 1 
+   FROM coletores 
+   WHERE re = $1 
+     AND hora_baixa IS NULL 
+   LIMIT 1`,
+      [re]
+    );
+
+    if (verificaPendente.rowCount > 0) {
+      console.log("⚠️ Usuário já possui um coletor pendente de devolução.");
+
+      return res.status(400).json({
+        error: "Usuário já possui um coletor pendente de devolução.",
+      });
+    }
     await db.query(
       `INSERT INTO coletores 
       (re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado) 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado]
+      [
+        re,
+        numero_coletor,
+        encarregado,
+        turno,
+        setor,
+        hora_pegou,
+        hora_baixa,
+        estado,
+      ]
     );
 
     console.log("✅ Coletor salvo com sucesso!");
@@ -53,7 +79,9 @@ router.post("/", async (req, res) => {
 // READ - listar todos
 router.get("/", async (req, res) => {
   try {
-    const resultado = await db.query("SELECT * FROM coletores ORDER BY id DESC");
+    const resultado = await db.query(
+      "SELECT * FROM coletores ORDER BY id DESC"
+    );
     res.json(resultado.rows);
   } catch (err) {
     console.error("❌ Erro ao buscar coletores:", err.message);
@@ -90,7 +118,7 @@ router.put("/:id", async (req, res) => {
     setor,
     hora_pegou,
     hora_baixa,
-    estado
+    estado,
   } = req.body;
 
   try {
@@ -105,7 +133,17 @@ router.put("/:id", async (req, res) => {
         hora_baixa = $7,
         estado = $8
        WHERE id = $9`,
-      [re, numero_coletor, encarregado, turno, setor, hora_pegou, hora_baixa, estado, id]
+      [
+        re,
+        numero_coletor,
+        encarregado,
+        turno,
+        setor,
+        hora_pegou,
+        hora_baixa,
+        estado,
+        id,
+      ]
     );
 
     res.json({ message: "Coletor atualizado com sucesso!" });
@@ -114,7 +152,5 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar coletor." });
   }
 });
-
-
 
 module.exports = router;

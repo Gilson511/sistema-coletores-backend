@@ -1,3 +1,16 @@
+-- ============================
+-- TABELA DE USUÁRIOS DO SISTEMA
+-- ============================
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id SERIAL PRIMARY KEY,
+  usuario VARCHAR(50) NOT NULL UNIQUE,
+  senha TEXT NOT NULL,
+  tipo VARCHAR(20) DEFAULT 'comum',
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ativo BOOLEAN DEFAULT TRUE
+);
+
 -- Tabela principal de coletores em uso
 CREATE TABLE IF NOT EXISTS coletores (
   id SERIAL PRIMARY KEY,
